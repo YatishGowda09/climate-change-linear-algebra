@@ -170,6 +170,70 @@ Once opened, click **Restart Kernel & Run All Cells**. Verify that:
 
 ---
 
+## 🔄 How to Pull Latest Updates from the Original Repo
+
+Whenever updates, code improvements, or fixes are pushed to the main repository, you can update your local files easily:
+
+### Scenario 1: If You Cloned Directly (Recommended)
+If you cloned via `git clone https://github.com/YatishGowda09/climate-change-linear-algebra.git`:
+
+1. Open your terminal / PowerShell in the project folder and run:
+   ```bash
+   git pull origin main
+   ```
+2. If any packages were added or updated, refresh your dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+---
+
+### Scenario 2: If You Forked the Repository
+If you created your own fork on GitHub and cloned from your fork:
+
+1. **One-Time Setup** — Connect to the original repository as `upstream`:
+   ```bash
+   git remote add upstream https://github.com/YatishGowda09/climate-change-linear-algebra.git
+   ```
+   *(Run `git remote -v` to verify you have both `origin` (your fork) and `upstream` (original)).*
+
+2. **Pull the latest changes into your local branch:**
+   ```bash
+   git pull upstream main
+   ```
+
+3. **(Optional) Sync your GitHub fork:**
+   ```bash
+   git push origin main
+   ```
+
+---
+
+### ⚠️ Pro-Tip: Fixing "Local Changes Would Be Overwritten"
+Because Jupyter automatically saves cell outputs and execution timestamps every time you run a notebook, Git might report:
+```text
+error: Your local changes to the following files would be overwritten by merge:
+    Climate_Change_Project.ipynb
+Please commit your changes or stash them before you merge.
+```
+
+To resolve this in seconds:
+- **Option A — Discard local run outputs and accept the latest clean notebook:**
+  ```bash
+  git restore Climate_Change_Project.ipynb
+  git pull
+  ```
+  *(On older Git versions, use `git checkout -- Climate_Change_Project.ipynb`)*
+
+- **Option B — Temporarily stash your changes, pull, and re-apply:**
+  ```bash
+  git stash
+  git pull
+  git stash pop
+  ```
+
+---
+
 ## 🎤 Presentation & Viva Preparation
 Please study the accompanying documents before our demo:
 
