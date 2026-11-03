@@ -115,13 +115,26 @@ The proportion of variance explained by each principal eigenvector is:
 $$\text{Explained Variance}_1 = \frac{\lambda_1}{\lambda_1 + \lambda_2} \times 100\% = \frac{0.421322}{0.429471} \times 100\% = \mathbf{98.10\%}$$
 $$\text{Explained Variance}_2 = \frac{\lambda_2}{\lambda_1 + \lambda_2} \times 100\% = \frac{0.008149}{0.429471} \times 100\% = \mathbf{1.90\%}$$
 
-### 2.5 Physical Climate Interpretation
+### 2.5 Physical Climate Interpretation & Scale Dependence
 - **Principal Component 1 ($\lambda_1 = 0.4213, \mathbf{98.10\%}$):**
   - Direction: $v_1 = [-0.9188, -0.3947]^T \propto [+0.9188, +0.3947]^T$. Both components have the same sign—as time progresses, temperature anomaly increases.
-  - **Meaning:** This dominant eigenvalue captures the secular, multi-decadal **global warming trend**. Almost all variance in the 44-year record is accounted for by continuous warming.
 - **Principal Component 2 ($\lambda_2 = 0.0081, \mathbf{1.90\%}$):**
   - Direction: $v_2 = [0.3947, -0.9188]^T$, perpendicular to the warming trajectory ($v_1^T v_2 = 0$).
-  - **Meaning:** This minor component represents short-term orthogonal scatter—annual climate variability, El Niño-Southern Oscillation (ENSO) spikes, volcanic aerosols, and measurement noise.
+
+### 2.6 Crucial Nuance: Scale Dependence of Covariance PCA
+A critical linear algebraic property must be recognized:
+- Normalized time $t \in [-1, 1]$ has sample variance $s_t^2 \approx 0.357$.
+- Temperature anomalies in $^\circ\text{C}$ have sample variance $s_b^2 \approx 0.0725$.
+
+Because time and temperature have different physical units and numerical scales, performing PCA on the **unstandardized covariance matrix** is scale-dependent: the first eigenvector naturally leans toward the variable with the larger numerical variance ($t$). If we measured temperature in Fahrenheit or mapped time to $[0, 1]$, the eigenvalue percentage would change.
+
+The **unit-free, scale-invariant** metric is the **Pearson correlation coefficient**:
+$$r = \frac{s_{tb}}{s_t s_b} \approx 0.9313 \implies r^2 \approx 0.8674 \quad (86.74\%)$$
+This shows that time and temperature are **strongly correlated**, and a simple straight line accounts for about $86.7\%$ of the variance in temperature anomalies over time.
+
+Furthermore, if both variables are standardized to unit variance before PCA (correlation matrix PCA):
+$$R = \begin{bmatrix} 1 & r \\ r & 1 \end{bmatrix} \implies \lambda_1 = 1 + r \approx 1.9313 \quad (\mathbf{96.57\%}), \quad \lambda_2 = 1 - r \approx 0.0687 \quad (\mathbf{3.43\%})$$
+Both analyses lead to the same honest conclusion: the two variables are strongly correlated along an upward trajectory, but the unstandardized 98.10% figure should be understood in the context of variable scaling.
 
 ---
 
@@ -226,8 +239,9 @@ When professors ask, *"How does this 2D eigenvalue problem connect to real clima
 ### Q2: What is the significance of $P^T P = I$ and $P^{-1} = P^T$?
 > **Answer:** The columns of $P$ are unit-length eigenvectors that are mutually perpendicular ($v_1 \cdot v_2 = 0$). This makes $P$ an orthogonal matrix. For orthogonal matrices, the inverse is simply the transpose ($P^{-1} = P^T$), meaning coordinate rotation preserves Euclidean lengths and angles without requiring expensive matrix inversions.
 
-### Q3: What does the first eigenvalue $\lambda_1 = 0.4213$ physically mean?
-> **Answer:** $\lambda_1$ represents the variance of the data projected onto the first principal axis. Dividing by total variance $\lambda_1 / (\lambda_1 + \lambda_2)$ shows that **98.10%** of all bivariate variation is concentrated along this single direction. Because the eigenvector $v_1$ has positive components in both time and temperature, it mathematically proves that the long-term upward warming trend dominates all other phenomena.
+### Q3: What does the first eigenvalue $\lambda_1 = 0.4213$ physically mean, and is it scale-dependent?
+> **Answer:** $\lambda_1$ represents the variance of the data projected onto the first principal axis, accounting for **98.10%** of total variance in the unstandardized covariance matrix. However, unstandardized covariance PCA is scale-dependent: because time ($t \in [-1, 1]$, variance 0.357) has larger numerical variance than temperature in °C (variance 0.0725), the first component naturally leans toward time.
+> The unit-free, scale-invariant summary is the Pearson correlation coefficient: $r \approx 0.9313$ ($r^2 \approx 86.74\%$). This shows that the two variables are strongly correlated along an upward trajectory, meaning a straight line explains ~87% of the variance. If standardized to unit variance, the first component accounts for 96.57%. Both confirm a strong warming trend, but correlation is the appropriate scale-free metric.
 
 ### Q4: Why is $\lambda_2$ non-zero?
 > **Answer:** If all 44 data points fell perfectly on a straight line, $\lambda_2$ would be exactly 0. Because real temperatures fluctuate due to natural variability (volcanic eruptions, solar cycles, El Niño), there is perpendicular scatter away from the trend line. $\lambda_2 = 0.0081$ accounts for this remaining 1.90% of variance.

@@ -165,8 +165,9 @@ Once opened, click **Restart Kernel & Run All Cells**. Verify that:
   5. Centered data cloud with principal eigenvector arrows & variance bar chart
 - [x] Summary printouts display:
   - System consistency: $\text{rank}(A) = 4, \text{rank}([A \mid b]) = 5$ (Inconsistent)
-  - Fit quality: $R^2 \approx 0.8857$ (88.57% variance explained)
-  - Dominant eigenvalue: $\lambda_1 = 0.4213$ (98.10% variance)
+  - Fit quality: $R^2 \approx 0.8857$ (88.57% variance explained, matching QR back-substitution)
+  - Scale-invariant metric: Pearson correlation $r \approx 0.9313$ ($r^2 \approx 86.74\%$)
+  - Dominant eigenvalue: $\lambda_1 = 0.4213$ (98.10% unstandardized covariance variance; 96.57% standardized)
 
 ---
 

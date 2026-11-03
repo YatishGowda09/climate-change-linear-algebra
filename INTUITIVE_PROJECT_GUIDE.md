@@ -232,7 +232,38 @@ Why does this matter? Because once your basis is orthonormal, projecting any vec
 
 $$\hat{p} = Q Q^T b$$
 
-There is no matrix inversion required. You avoid all risk of ill-conditioned matrices. Gram-Schmidt gives us a clean, perpendicular coordinate frame for our 4-dimensional subspace.
+There is no matrix inversion required. You avoid all risk of ill-conditioned matrices. 
+
+Even better: we can use $Q$ and $R_{\text{gs}}$ to solve directly for our polynomial coefficients. Because $A = Q R_{\text{gs}}$, the normal equations $(A^T A)\hat{x} = A^T b$ reduce immediately to:
+
+$$R_{\text{gs}} \hat{x} = Q^T b$$
+
+Because $R_{\text{gs}}$ is upper-triangular, we solve this directly by back-substitution from the bottom up. No matrix inversion of $A^T A$ is ever needed, preserving numerical precision.
+
+A quick technical note: this algorithm is Classical Gram-Schmidt (CGS). On massive or poorly conditioned matrices, Classical Gram-Schmidt can lose orthogonality due to roundoff errors (where Modified Gram-Schmidt is preferred). But because we normalized our years to $[-1, 1]$, our matrix is well-conditioned, and $Q^T Q = I_4$ holds to machine precision.
+
+---
+
+## Why Degree 3? The Model Degree Comparison
+
+Before jumping into predictions, ask an obvious question: why did we pick a cubic polynomial ($T(t) = a_0 + a_1 t + a_2 t^2 + a_3 t^3$) in the first place? Why not a simple straight line, or a complex 6th-degree curve?
+
+We tested polynomials from degree 1 all the way to degree 6, evaluating both training fit ($R^2$) and 5-fold cross-validation error:
+
+| Degree | Model Form | $R^2$ | Adjusted $R^2$ | Cross-Validation Error |
+| :--- | :--- | :--- | :--- | :--- |
+| **1 (Linear)** | $a_0 + a_1 t$ | $86.74\%$ | $86.42\%$ | $0.01057$ |
+| **2 (Quadratic)** | $a_0 + a_1 t + a_2 t^2$ | $88.55\%$ | $88.00\%$ | $0.00908$ |
+| **3 (Cubic)** | $a_0 + a_1 t + a_2 t^2 + a_3 t^3$ | $88.57\%$ | $87.71\%$ | $0.00992$ |
+| **4 (Quartic)** | Degree 4 | $88.81\%$ | $87.67\%$ | $0.01026$ |
+| **5 (Quintic)** | Degree 5 | $88.97\%$ | $87.52\%$ | $0.01167$ |
+| **6 (Sextic)** | Degree 6 | $88.97\%$ | $87.18\%$ | $0.01346$ |
+
+Look at what these numbers reveal:
+- A straight line (degree 1) already explains **$86.74\%$** of the variance. 
+- Jumping to degree 2 increases $R^2$ to **$88.55\%$**, confirming that global warming accelerated compared to the 1980s.
+- Moving to degree 3 adds only a tiny marginal gain of **$+0.02\%$** (reaching $88.57\%$). That tiny gain is why our cubic coefficient $a_3 = -0.0203$ is so small!
+- Beyond degree 3, Adjusted $R^2$ actually decreases, and cross-validation error climbs steadily ($0.0099 \to 0.0135$). Degrees 4 through 6 begin overfitting to short-term annual noise. Degree 3 represents the ideal balance.
 
 ---
 
@@ -254,23 +285,35 @@ flowchart LR
         D1["Data Points Anchor the Curve"] --> D2["Smooth, Stable, High Confidence"]
     end
     subgraph ExtrapolationZone["Extrapolation Domain: 2024 to 2050 (t > 1)"]
-        E1["No Future Data Anchors"] --> E2["Cubic Term t^3 Dominates"]
-        E2 --> E3["High Mathematical Risk & Divergence"]
+        E1["No Future Data Anchors"] --> E2["Higher Powers Dominate as |t| > 1"]
+        E2 --> E3["Unphysical Turnover Far Out & No Climate Physics"]
     end
     InterpolationZone -->|Pass Year 2023 Boundary| ExtrapolationZone
 ```
 
-Now look at extrapolation. Suppose we march forward to year 2040 ($t \approx 1.79$) or year 2050 ($t \approx 2.26$). 
+Now look at extrapolation for 2025 to 2050. Look closely at the predicted numbers:
+- 2025: $+1.0941^\circ\text{C}$
+- 2030: $+1.2386^\circ\text{C}$ ($+0.1445^\circ\text{C}$)
+- 2035: $+1.3869^\circ\text{C}$ ($+0.1483^\circ\text{C}$)
+- 2040: $+1.5374^\circ\text{C}$ ($+0.1505^\circ\text{C}$)
+- 2045: $+1.6885^\circ\text{C}$ ($+0.1511^\circ\text{C}$)
+- 2050: $+1.8388^\circ\text{C}$ ($+0.1503^\circ\text{C}$)
 
-The formula predicts $+1.54^\circ\text{C}$ for 2040 and $+1.84^\circ\text{C}$ for 2050. It suggests that global warming will cross the critical $+1.5^\circ\text{C}$ Paris Agreement threshold around 2038 to 2040.
+Notice something surprising here: the increments are nearly uniform at about $+0.15^\circ\text{C}$ every 5 years! In our forecast window of 2025 to 2050, the cubic model actually behaves almost like a straight line.
 
-But here is where you must be intellectually honest as a student. 
+Why? Because the cubic coefficient $a_3 = -0.0203$ is tiny. The rate of warming (the slope $y'(t)$) peaks at an inflection point around year 2041–2042 ($t \approx 1.89$). After that, the negative cubic term begins to bend the curve downward, eventually reaching an unphysical local maximum around year 2112 ($t \approx 5.16$).
 
-Outside the interval $[-1, 1]$, polynomials are notorious wild beasts. As $t$ grows larger than $1$, the cubic term $t^3$ grows exponentially faster than the linear term. Any tiny error or noise in your estimated coefficients gets amplified dramatically as you move further away from the data boundary.
+So the notebook's limitation is not that it shoots to infinity in 2050. The honest mathematical limitations are:
+1. Higher powers dominate more and more as $|t|$ grows past 1, meaning polynomials eventually behave unphysically far out (in our case, turning downward around 2112).
+2. The model contains no physics: it knows nothing about greenhouse gas concentrations, ocean heat capacity, atmospheric chemistry, or radiative forcing.
 
-Furthermore, our model only knows about time. It knows nothing about greenhouse gas concentrations, ocean heat capacity, atmospheric chemistry, or climate policy. 
+### An Essential Nuance: Baseline Mixing
+When comparing our numbers to the Paris Agreement's $+1.5^\circ\text{C}$ target, we must be careful about baselines:
+- NASA GISS anomalies are measured relative to the **1951–1980 baseline**.
+- The Paris Agreement and IPCC reports measure targets relative to **pre-industrial levels (1850–1900)**.
+- The 1951–1980 baseline was already roughly $0.25^\circ\text{C}$ to $0.30^\circ\text{C}$ warmer than pre-industrial temperatures.
 
-Polynomial extrapolation is a useful baseline, but it is purely descriptive, not predictive. Real climate prediction requires thermodynamics and fluid dynamics, not just polynomials.
+Therefore, reaching $+1.5^\circ\text{C}$ above pre-industrial levels corresponds to roughly $+1.20^\circ\text{C}$ to $+1.25^\circ\text{C}$ on NASA's scale, which our trajectory crosses around **2028–2030**! Our prediction of $+1.54^\circ\text{C}$ in 2040 actually represents roughly $+1.80^\circ\text{C}$ of total pre-industrial warming.
 
 ---
 
@@ -321,13 +364,17 @@ Compute the proportion of variance explained by the first eigenvalue:
 
 $$\frac{\lambda_1}{\text{Total Variance}} = \frac{0.421322}{0.429471} = \mathbf{98.10\%}$$
 
-This is the most striking mathematical insight of the entire project. 
+Now here is the critical linear algebra catch that you must understand: **this 98.10% number is scale-dependent**.
 
-The first eigenvalue accounts for $98.10\%$ of all variation in the data. Its eigenvector points diagonally upward. It captures the continuous, multi-decadal global warming signal.
+Time (normalized to $[-1, 1]$, sample variance $0.357$) and temperature anomaly in $^\circ\text{C}$ (sample variance $0.0725$) have completely different units and numerical scales. Because normalized time has roughly five times larger numerical variance than temperature in Celsius, PCA on an unstandardized covariance matrix naturally leans toward time. If you measured temperature in Fahrenheit or mapped time to $[0, 1]$, this percentage would shift!
 
-The second eigenvalue accounts for only $1.90\%$ of the variance. Its eigenvector points perpendicular to the warming line. It captures the natural, year-to-year scatter of weather, volcanic eruptions, and measurement noise.
+What is the true, unit-free measure of how closely these two variables track each other? It is the **Pearson correlation coefficient**:
 
-Linear algebra shows that forty-four years of global climate records are, to a ninety-eight percent approximation, entirely a one-dimensional line.
+$$r \approx 0.9313 \implies r^2 \approx 0.8674 \quad (\mathbf{86.74\%})$$
+
+This tells you the objective truth without unit distortions: time and temperature are **strongly correlated**, and a simple straight line accounts for about $86.7\%$ of the variance in global temperatures. 
+
+If we standardize both variables to unit variance before PCA (correlation matrix PCA), the first eigenvalue is $\lambda_1 = 1 + r \approx 1.9313$, accounting for **$96.57\%$** of the standardized variance. Both metrics tell the same underlying story: the long-term warming trend is the overwhelming signal, while perpendicular weather fluctuations represent short-term noise.
 
 ---
 
@@ -366,8 +413,9 @@ The entire project follows one continuous logical chain:
 - Normalizing the years to $[-1, 1]$ prevented catastrophic floating-point cancellation in our Vandermonde matrix.
 - Gaussian elimination and RREF revealed a contradictory row ($0 = 1$), proving that the system has no exact solution because observation vector $b$ sticks out of the 4D column space $\text{Col}(A)$.
 - We resolved this inconsistency by computing the orthogonal projection $\hat{p}$ of $b$ onto $\text{Col}(A)$, which led directly to the Normal Equations $A^T A \hat{x} = A^T b$.
-- Gram-Schmidt orthogonalization converted our skewed monomial columns into an orthonormal basis $Q$, enabling stable projection without matrix inversion.
-- Our fitted cubic polynomial explained $88.57\%$ of historical temperature variance ($R^2 \approx 0.886$).
-- Interpolation within 1980 to 2023 is mathematically stable, while extrapolation to 2050 carries inherent divergence risks due to the cubic term and missing physical drivers.
-- Eigendecomposition of the covariance matrix revealed that the first principal component accounts for $98.10\%$ of all data variance, mathematically proving that global warming is the overwhelming dominant signal behind four decades of climate records.
+- Gram-Schmidt orthogonalization converted our skewed monomial columns into an orthonormal basis $Q$, enabling stable projection and directly solving $R_{\text{gs}} \hat{x} = Q^T b$ via back-substitution without inverting $A^T A$.
+- Model degree comparison across degrees 1 to 6 proved that degree 2 captures warming acceleration ($R^2 = 88.55\%$), while degree 3 adds a tiny marginal gain ($+0.02\%$ to $88.57\%$). Degrees 4 through 6 overfit with declining adjusted $R^2$ and rising cross-validation error.
+- Interpolation within 1980 to 2023 is mathematically stable. In extrapolation (2025 to 2050), the curve warms in nearly constant increments of $\approx 0.15^\circ\text{C}$ every 5 years, peaking in slope around 2041–2042 before turning downward around 2112. The honest limits are unphysical turnover far out and the absence of climate physics.
+- The 1951–1980 NASA GISS baseline is $\approx 0.25^\circ\text{C}$ to $0.30^\circ\text{C}$ warmer than pre-industrial levels, meaning the Paris $+1.5^\circ\text{C}$ target corresponds to $+1.20^\circ\text{C}$–$+1.25^\circ\text{C}$ on NASA's baseline (reached around 2028–2030).
+- Eigendecomposition of the unstandardized covariance matrix yields $\lambda_1 = 0.4213$ ($98.10\%$), but this is scale-dependent. The scale-invariant metric is the Pearson correlation $r \approx 0.9313$ ($r^2 \approx 86.74\%$), proving that time and temperature are strongly correlated along an upward trajectory.
 - Diagonalization ($C = P D P^T$) rotated our coordinate system to decouple the continuous warming trend from short-term annual climate noise.
