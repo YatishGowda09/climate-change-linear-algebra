@@ -118,88 +118,84 @@ flowchart TD
         b["Observed Temperature Vector b\n(Sticks out due to climate noise)"]
         p["Orthogonal Projection p_hat\n(Closest point in Col(A) to b)"]
         e["Residual Error Vector e = b - p_hat\n(Perpendicular to Col(A))"]
-        
-        b -. "Drop Perpendicular" .-> p
-        p --> ColA
-        b --- e
-        e -. "Orthogonal to" .-> ColA
     end
+    b -->|Drop Perpendicular Shadow| p
+    p -->|Error Arrow| b
+    ColA --- p
 ```
 
-Think of this like a flat tabletop sitting in a three-dimensional room. The tabletop is a 2D subspace. If you hold a tennis ball up in the air above the table, that tennis ball is vector $b$. 
+Notice the conflict: our data point $b$ lives in $\mathbb{R}^{44}$, but our model is trapped inside the 4-dimensional subspace $\text{Col}(A)$. 
 
-Can you touch the tennis ball while keeping your finger glued to the tabletop? No. The tennis ball does not lie on the table. That is why $Ax = b$ has no exact solution: vector $b$ is floating out in forty-four dimensional space, sticking out of the 4D subspace.
+Because climate data contains random noise, vector $b$ does not lie inside $\text{Col}(A)$. It sticks out into forty-four dimensional space like a flagpole pointing away from a tabletop. 
 
-What about the null space of $A$? The null space consists of any coefficient vector $x$ that produces zero: $Ax = \mathbf{0}$. 
+Demanding an exact solution $A x = b$ means searching inside the 4D tabletop for a vector that matches an arrow sticking up into the room. It is physically and mathematically impossible.
 
-By the Rank-Nullity theorem, $\text{nullity}(A) = \text{columns} - \text{rank} = 4 - 4 = 0$. 
+What about the null space $\text{Null}(A)$? 
 
-The null space contains only the zero vector. Physically, that is fantastic news: it means there is no wiggle room or ambiguity in our four polynomial terms. Once we find our best fit, that fit is guaranteed to be unique.
+By the Rank-Nullity Theorem:
+
+$$\text{nullity}(A) = \text{number of columns} - \text{rank}(A) = 4 - 4 = 0$$
+
+The null space contains only the zero vector $\mathbf{0}$. 
+
+This is good news. It tells us that no non-zero combination of polynomial coefficients can produce a flat zero curve. Once we find our best-fitting curve, those coefficients will be strictly unique. There are no redundant degrees of freedom.
 
 ---
 
-## Dropping the Perpendicular: Orthogonal Projection
+## Dropping the Shadow: Orthogonal Projection
 
-So the tennis ball is hovering above the tabletop. What is the smartest thing we can do?
+So we cannot reach $b$. What is the next best thing?
 
-We look directly down from the ball and find the point on the tabletop that is closest to it. That point is the shadow of the ball on the table: the orthogonal projection, denoted $\hat{p}$.
+If you cannot reach an arrow sticking up into the room, you look down at the tabletop and find the shadow directly beneath it. 
 
-Because $\hat{p}$ lies flat on the table, it lives inside $\text{Col}(A)$. That means there really is some coefficient vector $\hat{x}$ such that:
+The point on the tabletop closest to the tip of that arrow is its orthogonal projection, denoted $\hat{p}$:
 
-$$\hat{p} = A \hat{x}$$
+```mermaid
+flowchart LR
+    A["Vector b outside Col(A)"] --> B["Drop Perpendicular Line"]
+    B --> C["Point p_hat inside Col(A)"]
+    C --> D["Residual e = b - p_hat is Orthogonal to Col(A)"]
+```
 
-Look at the error vector connecting the shadow to the actual ball:
+Geometrically, the distance between $b$ and any point $A x$ in the subspace is the length of the error vector:
 
-$$e = b - \hat{p} = b - A \hat{x}$$
+$$\|e\| = \|b - A x\|$$
 
-Notice the geometry here. If $\hat{p}$ is truly the closest point on the table to $b$, the error vector $e$ must be straight up and down. It must be perpendicular (orthogonal) to every single direction on the table.
+By the Pythagorean theorem in $\mathbb{R}^{44}$, this distance is smallest if and only if the error vector $e = b - \hat{p}$ drops straight down onto the subspace at a perfect ninety-degree angle:
 
-Because the columns of $A$ span the entire tabletop, $e$ must be orthogonal to every column of $A$. In linear algebra, orthogonal means the dot product is zero:
+$$e \perp \text{Col}(A)$$
 
-$$A^T e = \mathbf{0}$$
+Being perpendicular to the entire subspace means that $e$ must be perpendicular to every single column of matrix $A$:
 
-Now substitute $e = b - A \hat{x}$ into that orthogonality condition:
+$$\mathbf{a}_j^T (b - A \hat{x}) = 0 \quad \text{for } j = 0, 1, 2, 3$$
+
+Stack all four conditions into one matrix equation:
 
 $$A^T (b - A \hat{x}) = \mathbf{0}$$
 
-Expand the brackets:
+Distribute $A^T$:
 
-$$A^T b - A^T A \hat{x} = \mathbf{0}$$
+$$A^T b - A^T A \hat{x} = \mathbf{0} \implies A^T A \hat{x} = A^T b$$
 
-Move $A^T A \hat{x}$ to the other side:
+Notice what just happened. The impossible $44 \times 4$ system $A x = b$ has collapsed into a square, balanced $4 \times 4$ system called the Normal Equations. 
 
-$$A^T A \hat{x} = A^T b$$
+Because the columns of $A$ are linearly independent, the $4 \times 4$ matrix $A^T A$ is guaranteed to be symmetric and invertible. We can solve for $\hat{x}$ directly:
 
-Notice what just happened. The famous Normal Equations of least squares were not invented by magic or arbitrary curve-fitting rules. They are simply the direct algebraic translation of dropping a perpendicular shadow onto a subspace.
+$$\hat{x} = (A^T A)^{-1} A^T b$$
 
-```mermaid
-sequenceDiagram
-    participant Reality as "Raw Observed Vector b (R^44)"
-    participant Geometry as "Geometric Projection"
-    participant Algebra as "Normal Equations (A^T A x = A^T b)"
-    participant Solution as "Optimal Polynomial y(t)"
+Multiply by $A$ on the left, and you get the projected point:
 
-    Reality->>Geometry: b sticks out of 4D subspace
-    Geometry->>Algebra: Require residual e = (b - p) to be perpendicular
-    Algebra->>Solution: Solve 4x4 linear system for x_hat
-    Solution-->>Reality: Generates best possible smooth cubic curve
-```
+$$\hat{p} = A \hat{x} = A (A^T A)^{-1} A^T b = P_{\text{proj}} b$$
 
-Because $A$ has full column rank, the $4 \times 4$ matrix $A^T A$ is guaranteed to be invertible. Solving this $4 \times 4$ system gives our optimal polynomial coefficients:
-
-$$a_0 \approx 0.5103, \quad a_1 \approx 0.4325, \quad a_2 \approx 0.1151, \quad a_3 \approx -0.0203$$
-
-The length of the error vector, $\|e\| \approx 0.5971$, is the shortest possible geometric distance from reality to our cubic model. 
-
-Comparing that error to the total variance of the data gives an $R^2$ of $0.8857$. That means our 4D subspace captures $88.57\%$ of everything that happened to global temperatures over the last forty-four years.
+The matrix $P_{\text{proj}} = A(A^T A)^{-1} A^T$ is our projection matrix. It takes any vector in forty-four dimensional space and drops it straight down into its optimal shadow inside $\text{Col}(A)$.
 
 ---
 
-## Straightening the Axes: Gram-Schmidt Orthogonalization
+## Straightening the Grid: Gram-Schmidt Orthogonalization
 
 Now, think about this from a computational perspective. 
 
-To solve $A^T A \hat{x} = A^T b$, we have to form $A^T A$ and invert it. But why were the columns of $A$ messy in the first place?
+To solve $A^T A \hat{x} = A^T b$, we have to form $A^T A$ and solve it. But why were the columns of $A$ messy in the first place?
 
 Because the monomial columns of $A$ ($1, t, t^2, t^3$) are not perpendicular. On the interval $[-1, 1]$, the column for $1$ and the column for $t^2$ point somewhat in the same direction. They are skewed, like trying to build a grid system using chopsticks that meet at twenty-degree angles instead of ninety degrees.
 
@@ -244,36 +240,85 @@ A quick technical note: this algorithm is Classical Gram-Schmidt (CGS). On massi
 
 ---
 
-## Why Degree 3? The Model Degree Comparison
+## Inspecting System Conditioning via Eigenvalues of Matrix Transpose Times Matrix
 
-Before jumping into predictions, ask an obvious question: why did we pick a cubic polynomial ($T(t) = a_0 + a_1 t + a_2 t^2 + a_3 t^3$) in the first place? Why not a simple straight line, or a complex 6th-degree curve?
+Before proceeding to predictions, look at why normalization was so mathematically vital. 
 
-We tested polynomials from degree 1 all the way to degree 6, evaluating both training fit ($R^2$) and 5-fold cross-validation error:
+In linear algebra, a matrix equation $A x = b$ can be numerically fragile. If the condition number $\kappa(A)$ is huge, tiny rounding errors in floating-point hardware blow up into giant errors in the calculated coefficients.
 
-| Degree | Model Form | $R^2$ | Adjusted $R^2$ | Cross-Validation Error |
-| :--- | :--- | :--- | :--- | :--- |
-| **1 (Linear)** | $a_0 + a_1 t$ | $86.74\%$ | $86.42\%$ | $0.01057$ |
-| **2 (Quadratic)** | $a_0 + a_1 t + a_2 t^2$ | $88.55\%$ | $88.00\%$ | $0.00908$ |
-| **3 (Cubic)** | $a_0 + a_1 t + a_2 t^2 + a_3 t^3$ | $88.57\%$ | $87.71\%$ | $0.00992$ |
-| **4 (Quartic)** | Degree 4 | $88.81\%$ | $87.67\%$ | $0.01026$ |
-| **5 (Quintic)** | Degree 5 | $88.97\%$ | $87.52\%$ | $0.01167$ |
-| **6 (Sextic)** | Degree 6 | $88.97\%$ | $87.18\%$ | $0.01346$ |
+How do we measure the conditioning of our least squares system? By computing the eigenvalues of $A^T A$:
 
-Look at what these numbers reveal:
-- A straight line (degree 1) already explains **$86.74\%$** of the variance. 
-- Jumping to degree 2 increases $R^2$ to **$88.55\%$**, confirming that global warming accelerated compared to the 1980s.
-- Moving to degree 3 adds only a tiny marginal gain of **$+0.02\%$** (reaching $88.57\%$). That tiny gain is why our cubic coefficient $a_3 = -0.0203$ is so small!
-- Beyond degree 3, Adjusted $R^2$ actually decreases, and cross-validation error climbs steadily ($0.0099 \to 0.0135$). Degrees 4 through 6 begin overfitting to short-term annual noise. Degree 3 represents the ideal balance.
+$$(A^T A) v = \lambda v$$
+
+The condition number of $A^T A$ is given by the ratio of its largest eigenvalue to its smallest eigenvalue:
+
+$$\kappa(A^T A) = \frac{\lambda_{\max}(A^T A)}{\lambda_{\min}(A^T A)}$$
+
+The condition number of the design matrix $A$ itself is simply the square root: $\kappa(A) = \sqrt{\kappa(A^T A)}$.
+
+Look at what we get for our normalized matrix ($t \in [-1, 1]$):
+
+$$\lambda_1 = 0.8096, \quad \lambda_2 = 3.7744, \quad \lambda_3 = 21.7286, \quad \lambda_4 = 49.8566$$
+
+All four eigenvalues are positive, confirming that $A^T A$ is strictly positive definite. 
+
+Now compute the condition numbers:
+
+$$\kappa(A^T A) = \frac{49.8566}{0.8096} \approx 61.58 \implies \kappa(A) = \sqrt{61.58} \approx 7.85$$
+
+A condition number of $7.85$ is exceptionally small. In double-precision arithmetic, this guarantees that we lose less than a single decimal digit of numerical precision during matrix operations.
+
+Now contrast that with what happens if you do not normalize and use raw calendar years ($1980, 1981, \dots, 2023$):
+
+$$\kappa(A_{\text{raw}}) \approx 4.01 \times 10^{16}$$
+
+Double-precision floating-point numbers provide about 16 decimal digits of accuracy (machine epsilon $\approx 1.1 \times 10^{-16}$). A condition number of $10^{16}$ completely wipes out all reliable digits, producing catastrophic cancellation. 
+
+Computing the eigenvalues of $A^T A$ proves that time normalization was not a cosmetic tweak, but a strict mathematical necessity for stable linear algebra.
+
+---
+
+## The Honest Truth About Model Degree Selection
+
+Now look at the choice of polynomial degree. Why did we pick a cubic polynomial ($y(t) = a_0 + a_1 t + a_2 t^2 + a_3 t^3$)?
+
+We evaluated polynomials from degree 1 all the way to degree 6 using training fit ($R^2$), penalization for parameter count (Adjusted $R^2$), Leave-One-Out Cross-Validation (LOOCV), and an unobserved forward temporal holdout test (training on 1980–2013 and testing on 2014–2023):
+
+| Degree | Model Formula | $R^2$ | Adjusted $R^2$ | LOOCV Error | Forward Holdout Error (2014–23) | 2050 Forecast |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **1 (Linear)** | $a_0 + a_1 t$ | $0.8674$ | $0.8642$ | $0.01046$ | $0.02959$ | $+1.50^\circ\text{C}$ |
+| **2 (Quadratic)** | $a_0 + a_1 t + a_2 t^2$ | $0.8855$ | $\mathbf{0.8800}$ | $\mathbf{0.00951}$ | $\mathbf{0.02129}$ | $+2.04^\circ\text{C}$ |
+| **3 (Cubic)** | $a_0 + a_1 t + a_2 t^2 + a_3 t^3$ | $0.8857$ | $0.8771$ | $0.01018$ | $0.19396$ | $+1.84^\circ\text{C}$ |
+| **4 (Quartic)** | Degree 4 | $0.8881$ | $0.8767$ | $0.01049$ | $0.19522$ | $+5.24^\circ\text{C}$ |
+| **5 (Quintic)** | Degree 5 | $0.8897$ | $0.8752$ | $0.01164$ | $0.54480$ | $-6.12^\circ\text{C}$ |
+| **6 (Sextic)** | Degree 6 | $0.8897$ | $0.8718$ | $0.01357$ | $11.53812$ | $-4.36^\circ\text{C}$ |
+
+Notice something here — this table reveals a stark truth: **degree 2 beats degree 3 across every single model selection metric**.
+- Adjusted $R^2$ peaks at degree 2 ($0.8800$) and drops at degree 3 ($0.8771$).
+- Leave-one-out CV error is lowest for degree 2 ($0.00951$) and higher for degree 3 ($0.01018$).
+- In the forward temporal holdout test, degree 2 has an error of $0.02129$, while degree 3 has an error of $0.19396$ — about 9 times worse.
+
+Why is the forward test so much harsher on degree 3 than shuffled cross-validation? 
+
+Because randomly shuffling years leaks information. In a time series, year 1999 and year 2001 are tightly autocorrelated. If 1999 and 2001 are in the training set while 2000 is in the test set, the model easily interpolates between them. 
+
+A forward temporal split (train on the past, test on the unobserved future) is the only realistic test of predictive capability. And that forward test decisively prefers degree 2.
+
+The choice of degree also has a substantial impact on future forecasts. Degree 2 projects $+2.04^\circ\text{C}$ by 2050, reflecting sustained warming acceleration. In contrast, degree 3 projects $+1.84^\circ\text{C}$ because the tiny negative cubic coefficient ($a_3 = -0.0203$) begins to bend the curve downward.
+
+So let us be completely honest: the data did not pick the cubic model. Statistical model selection favors the quadratic. 
+
+We retain degree 3 solely to fulfill our university syllabus requirement of demonstrating a 4-dimensional subspace ($A \in \mathbb{R}^{44 \times 4}$, 4 pivot columns, 4 Gram-Schmidt basis vectors). Maintaining academic honesty about this distinction is essential.
 
 ---
 
 ## Interpolation Versus Extrapolation: The Danger Zone
 
-Now that we have our optimal cubic curve:
+Now that we understand our fitted cubic curve:
 
 $$y(t) = 0.5103 + 0.4325t + 0.1151t^2 - 0.0203t^3$$
 
-we can finally use it to answer our original questions.
+we can examine its behavior when evaluating interpolation versus extrapolation.
 
 First, look at interpolation. Suppose we evaluate this formula at year 2000.5 (which maps to $t \approx -0.0465$). The formula outputs approximately $+0.4904^\circ\text{C}$. 
 
@@ -293,17 +338,17 @@ flowchart LR
 
 Now look at extrapolation for 2025 to 2050. Look closely at the predicted numbers:
 - 2025: $+1.0941^\circ\text{C}$
-- 2030: $+1.2386^\circ\text{C}$ ($+0.1445^\circ\text{C}$)
-- 2035: $+1.3869^\circ\text{C}$ ($+0.1483^\circ\text{C}$)
-- 2040: $+1.5374^\circ\text{C}$ ($+0.1505^\circ\text{C}$)
-- 2045: $+1.6885^\circ\text{C}$ ($+0.1511^\circ\text{C}$)
-- 2050: $+1.8388^\circ\text{C}$ ($+0.1503^\circ\text{C}$)
+- 2030: $+1.2386^\circ\text{C}$ (change: $+0.1445^\circ\text{C}$)
+- 2035: $+1.3869^\circ\text{C}$ (change: $+0.1483^\circ\text{C}$)
+- 2040: $+1.5374^\circ\text{C}$ (change: $+0.1505^\circ\text{C}$)
+- 2045: $+1.6885^\circ\text{C}$ (change: $+0.1511^\circ\text{C}$)
+- 2050: $+1.8388^\circ\text{C}$ (change: $+0.1503^\circ\text{C}$)
 
-Notice something surprising here: the increments are nearly uniform at about $+0.15^\circ\text{C}$ every 5 years! In our forecast window of 2025 to 2050, the cubic model actually behaves almost like a straight line.
+Notice something surprising here: the increments are nearly uniform at about $+0.15^\circ\text{C}$ every 5 years. In our forecast window of 2025 to 2050, the cubic model actually behaves almost like a straight line.
 
 Why? Because the cubic coefficient $a_3 = -0.0203$ is tiny. The rate of warming (the slope $y'(t)$) peaks at an inflection point around year 2041–2042 ($t \approx 1.89$). After that, the negative cubic term begins to bend the curve downward, eventually reaching an unphysical local maximum around year 2112 ($t \approx 5.16$).
 
-So the notebook's limitation is not that it shoots to infinity in 2050. The honest mathematical limitations are:
+So the true mathematical limitations of our extrapolation are:
 1. Higher powers dominate more and more as $|t|$ grows past 1, meaning polynomials eventually behave unphysically far out (in our case, turning downward around 2112).
 2. The model contains no physics: it knows nothing about greenhouse gas concentrations, ocean heat capacity, atmospheric chemistry, or radiative forcing.
 
@@ -313,7 +358,7 @@ When comparing our numbers to the Paris Agreement's $+1.5^\circ\text{C}$ target,
 - The Paris Agreement and IPCC reports measure targets relative to **pre-industrial levels (1850–1900)**.
 - The 1951–1980 baseline was already roughly $0.25^\circ\text{C}$ to $0.30^\circ\text{C}$ warmer than pre-industrial temperatures.
 
-Therefore, reaching $+1.5^\circ\text{C}$ above pre-industrial levels corresponds to roughly $+1.20^\circ\text{C}$ to $+1.25^\circ\text{C}$ on NASA's scale, which our trajectory crosses around **2028–2030**! Our prediction of $+1.54^\circ\text{C}$ in 2040 actually represents roughly $+1.80^\circ\text{C}$ of total pre-industrial warming.
+Therefore, reaching $+1.5^\circ\text{C}$ above pre-industrial levels corresponds to roughly $+1.20^\circ\text{C}$ to $+1.25^\circ\text{C}$ on NASA's scale, which our trajectory crosses around **2028–2030**. Our prediction of $+1.54^\circ\text{C}$ in 2040 actually represents roughly $+1.80^\circ\text{C}$ of total pre-industrial warming.
 
 ---
 
@@ -330,8 +375,8 @@ flowchart TD
     Cloud["Bivariate Data Cloud (t_norm, b)"] --> Center["Subtract Means: X_c = X - mu"]
     Center --> Cov["Form 2x2 Covariance Matrix: C = (1/(N-1)) X_c^T X_c"]
     Cov --> Eig["Eigendecomposition: C v = lambda v"]
-    Eig --> PC1["lambda_1 = 0.4213 (98.1% of Variance)\nEigenvector v1: Secular Warming Trend"]
-    Eig --> PC2["lambda_2 = 0.0081 (1.9% of Variance)\nEigenvector v2: Orthogonal Weather Noise"]
+    Eig --> PC1["lambda_1 = 0.4213 (98.1% of Unstandardized Variance)\nDominant Direction of Joint Variance"]
+    Eig --> PC2["lambda_2 = 0.0081 (1.9% of Unstandardized Variance)\nOrthogonal Direction of Perpendicular Scatter"]
 ```
 
 To understand the shape of this cloud, we first center it by subtracting the average time and average temperature. This moves the center of mass of the cloud directly to the origin $(0, 0)$.
@@ -364,9 +409,9 @@ Compute the proportion of variance explained by the first eigenvalue:
 
 $$\frac{\lambda_1}{\text{Total Variance}} = \frac{0.421322}{0.429471} = \mathbf{98.10\%}$$
 
-Now here is the critical linear algebra catch that you must understand: **this 98.10% number is scale-dependent**.
+Now here is the critical linear algebra catch: **this 98.10% number is scale-dependent**.
 
-Time (normalized to $[-1, 1]$, sample variance $0.357$) and temperature anomaly in $^\circ\text{C}$ (sample variance $0.0725$) have completely different units and numerical scales. Because normalized time has roughly five times larger numerical variance than temperature in Celsius, PCA on an unstandardized covariance matrix naturally leans toward time. If you measured temperature in Fahrenheit or mapped time to $[0, 1]$, this percentage would shift!
+Time (normalized to $[-1, 1]$, sample variance $0.357$) and temperature anomaly in $^\circ\text{C}$ (sample variance $0.0725$) have completely different units and numerical scales. Because normalized time has roughly five times larger numerical variance than temperature in Celsius, PCA on an unstandardized covariance matrix naturally leans toward time. If you measured temperature in Fahrenheit or mapped time to $[0, 1]$, this percentage would shift.
 
 What is the true, unit-free measure of how closely these two variables track each other? It is the **Pearson correlation coefficient**:
 
@@ -374,21 +419,33 @@ $$r \approx 0.9313 \implies r^2 \approx 0.8674 \quad (\mathbf{86.74\%})$$
 
 This tells you the objective truth without unit distortions: time and temperature are **strongly correlated**, and a simple straight line accounts for about $86.7\%$ of the variance in global temperatures. 
 
-If we standardize both variables to unit variance before PCA (correlation matrix PCA), the first eigenvalue is $\lambda_1 = 1 + r \approx 1.9313$, accounting for **$96.57\%$** of the standardized variance. Both metrics tell the same underlying story: the long-term warming trend is the overwhelming signal, while perpendicular weather fluctuations represent short-term noise.
+Furthermore, if we standardize both variables to unit variance before PCA, the correlation matrix is:
+
+$$R = \begin{bmatrix} 1 & r \\ r & 1 \end{bmatrix}$$
+
+Solving $\det(R - \lambda I) = (1 - \lambda)^2 - r^2 = 0$ yields eigenvalues $\lambda = 1 \pm r$:
+
+$$\lambda_1 = 1 + r \approx 1.9313 \quad (\mathbf{96.57\%}), \quad \lambda_2 = 1 - r \approx 0.0687 \quad (\mathbf{3.43\%})$$
+
+Notice that for any $2 \times 2$ standardized system, this is an algebraic identity. Standardized PCA adds no new mathematical information beyond the correlation coefficient $r$. Both confirm that the two variables are strongly correlated along an upward trajectory.
 
 ---
 
-## The Clean Finish: Matrix Diagonalization
+## Matrix Diagonalization: Rotating to Uncorrelated Axes
 
 Now, look at what diagonalization does with this result.
 
 In our original coordinate system of time and temperature, the two variables are correlated. The off-diagonal entries in $C$ are non-zero. If someone tells you the year, it changes your expectation of the temperature.
 
-Diagonalization is the process of rotating our coordinate axes so that the variables become completely uncorrelated:
+Diagonalization is the process of rotating our coordinate axes so that the sample covariance becomes exactly zero:
 
 $$C = P D P^T$$
 
-The matrix $P$ is formed by placing our two normalized eigenvectors side by side as columns. Because the eigenvectors are perpendicular and unit length, $P$ is an orthogonal matrix, meaning $P^{-1} = P^T$.
+The matrix $P$ is formed by placing our two normalized eigenvectors side by side as columns:
+
+$$P = \begin{bmatrix} v_1 & v_2 \end{bmatrix} = \begin{bmatrix} -0.9188 & 0.3947 \\ -0.3947 & -0.9188 \end{bmatrix}$$
+
+Because the eigenvectors are perpendicular and unit length, $P$ is an orthogonal matrix, meaning $P^{-1} = P^T$.
 
 The matrix $D$ is a diagonal matrix holding the eigenvalues:
 
@@ -396,11 +453,13 @@ $$D = \begin{bmatrix} \lambda_1 & 0 \\ 0 & \lambda_2 \end{bmatrix} = \begin{bmat
 
 Notice what $D$ looks like. The off-diagonal covariance is literally zero.
 
-When we transform our centered climate data into this new eigenvector coordinate system ($Z = X_c P$), the covariance matrix of $Z$ is exactly $D$. 
+When we transform our centered climate data into this new eigenvector coordinate system ($Z = X_c P$), the covariance matrix of $Z$ is exactly $D$:
 
-In this rotated coordinate frame, the two physical processes are decoupled. One axis measures pure climate trend. The other axis measures pure climate noise. They do not interfere with each other.
+$$C_Z = \frac{1}{N-1} Z^T Z = P^T C P = D$$
 
-This is why linear algebra is so powerful. It takes a messy real-world phenomenon where time, warming, and noise are hopelessly tangled together, and systematically decomposes it into independent, orthogonal physical components.
+In this rotated coordinate frame, the coordinates are completely uncorrelated. The first coordinate $z_1$ aligns with the direction of maximum joint spread, while the second coordinate $z_2$ measures perpendicular residual scatter.
+
+Diagonalization acts as a rigid rotation that separates the dominant axis of joint variance from perpendicular variations.
 
 ---
 
@@ -408,14 +467,15 @@ This is why linear algebra is so powerful. It takes a messy real-world phenomeno
 
 The entire project follows one continuous logical chain:
 
-- We began with forty-four noisy temperature observations from NASA and wanted to fit a cubic polynomial.
+- We began with forty-four noisy temperature observations from NASA and wanted to fit a polynomial curve from first principles.
 - Writing the equations as $Ax = b$ produced forty-four equations for four unknowns, an overdetermined system.
-- Normalizing the years to $[-1, 1]$ prevented catastrophic floating-point cancellation in our Vandermonde matrix.
+- Normalizing the years to $[-1, 1]$ compressed the condition number from $\kappa(A_{\text{raw}}) \approx 4.01 \times 10^{16}$ down to $\kappa(A) \approx 7.85$, preventing catastrophic floating-point cancellation.
+- Inspecting the eigenvalues of $A^T A$ ($[0.81, 3.77, 21.73, 49.86]$) confirmed that the normalized normal equations are well-conditioned ($\kappa(A^T A) \approx 61.58$).
 - Gaussian elimination and RREF revealed a contradictory row ($0 = 1$), proving that the system has no exact solution because observation vector $b$ sticks out of the 4D column space $\text{Col}(A)$.
 - We resolved this inconsistency by computing the orthogonal projection $\hat{p}$ of $b$ onto $\text{Col}(A)$, which led directly to the Normal Equations $A^T A \hat{x} = A^T b$.
 - Gram-Schmidt orthogonalization converted our skewed monomial columns into an orthonormal basis $Q$, enabling stable projection and directly solving $R_{\text{gs}} \hat{x} = Q^T b$ via back-substitution without inverting $A^T A$.
-- Model degree comparison across degrees 1 to 6 proved that degree 2 captures warming acceleration ($R^2 = 88.55\%$), while degree 3 adds a tiny marginal gain ($+0.02\%$ to $88.57\%$). Degrees 4 through 6 overfit with declining adjusted $R^2$ and rising cross-validation error.
-- Interpolation within 1980 to 2023 is mathematically stable. In extrapolation (2025 to 2050), the curve warms in nearly constant increments of $\approx 0.15^\circ\text{C}$ every 5 years, peaking in slope around 2041–2042 before turning downward around 2112. The honest limits are unphysical turnover far out and the absence of climate physics.
-- The 1951–1980 NASA GISS baseline is $\approx 0.25^\circ\text{C}$ to $0.30^\circ\text{C}$ warmer than pre-industrial levels, meaning the Paris $+1.5^\circ\text{C}$ target corresponds to $+1.20^\circ\text{C}$–$+1.25^\circ\text{C}$ on NASA's baseline (reached around 2028–2030).
-- Eigendecomposition of the unstandardized covariance matrix yields $\lambda_1 = 0.4213$ ($98.10\%$), but this is scale-dependent. The scale-invariant metric is the Pearson correlation $r \approx 0.9313$ ($r^2 \approx 86.74\%$), proving that time and temperature are strongly correlated along an upward trajectory.
-- Diagonalization ($C = P D P^T$) rotated our coordinate system to decouple the continuous warming trend from short-term annual climate noise.
+- Model degree comparison across degrees 1 to 6 revealed that **degree 2 is the statistically superior model** (Adjusted $R^2 = 0.8800$, LOOCV error = $0.00951$, and forward holdout error = $0.02129$, roughly 9× lower than degree 3). Shuffled cross-validation leaks temporal autocorrelation. We retain degree 3 solely to demonstrate a 4-dimensional subspace ($A \in \mathbb{R}^{44 \times 4}$) as required by the course syllabus.
+- In extrapolation, degree 2 projects $+2.04^\circ\text{C}$ by 2050, while degree 3 projects $+1.84^\circ\text{C}$ due to a small negative cubic term ($a_3 = -0.0203$) that produces an inflection point near 2041–2042 before unphysical turnover around 2112.
+- The 1951–1980 NASA GISS baseline is $\approx 0.25^\circ\text{C}$ to $0.30^\circ\text{C}$ warmer than pre-industrial levels, meaning the Paris $+1.5^\circ\text{C}$ limit corresponds to $+1.20^\circ\text{C}$–$+1.25^\circ\text{C}$ on NASA's baseline (reached around 2028–2030).
+- Eigendecomposition of the unstandardized covariance matrix yields $\lambda_1 = 0.4213$ ($98.10\%$), but this is scale-dependent on time variance ($0.357$) versus temperature variance ($0.0725$). The scale-invariant metric is the Pearson correlation $r \approx 0.9313$ ($r^2 \approx 86.74\%$), proving that time and temperature are strongly correlated along an upward trajectory. Standardized PCA ($\lambda_1 = 1 + r \approx 1.9313$) is an algebraic identity that adds no new information beyond $r$.
+- Diagonalization ($C = P D P^T$) rigidly rotates coordinates to eliminate off-diagonal covariance, aligning axes with the principal directions of variance.
