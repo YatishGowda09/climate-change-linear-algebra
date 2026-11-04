@@ -12,7 +12,7 @@ This project applies linear algebra from first principles to model global climat
 | **Member 1** | Dataset curation, Vandermonde design matrix construction with year normalization, custom Gaussian elimination with partial pivoting for RREF, rank & system consistency analysis, and intermediate polynomial interpolation. |
 | **Member 2** | Gram-Schmidt orthogonalization algorithm ($QR$ factorization), derivation of normal equations $A^T A \hat{x} = A^T b$, least squares parameter estimation, and coefficient of determination ($R^2$) evaluation. |
 | **Member 3** | Column space ($\text{Col}(A)$) and null space ($\text{Nul}(A)$) geometric analysis, orthogonal projection matrix ($P_{\text{proj}}$) computation, residual orthogonality verification, and future temperature extrapolation (2024–2050). |
-| **Member 4** | Sample covariance matrix construction, eigenvalue/eigenvector decomposition, matrix diagonalization ($C = P D P^T$), full visualization suite (fits, residuals, extrapolation, and PCA projections), project synthesis, and viva guide. |
+| **Member 4** | Sample covariance matrix construction, eigenvalue/eigenvector decomposition, matrix diagonalization ($C = P D P^T$), full visualization suite (fits, extrapolation, and PCA projections), project synthesis, and viva guide. |
 
 ---
 

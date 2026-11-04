@@ -99,9 +99,9 @@
 
 #### Minute 7: Visualizations, Limitations & Conclusion (Presenter: Member 4)
 - **What to show on screen:**
-  - Section 12 Plot 1 (fitted curve), Plot 3 (residual stem plot), and the Conclusion markdown cell.
+  - Section 12 Plot 1 (fitted curve), Plot 2 (extrapolation to 2050), Plot 3 (eigenvalue & PCA subplot), and the Conclusion markdown cell.
 - **Talking points (Member 4):**
-  - "Looking at our residual stem plot (Plot 3), the residuals are centered around zero with no severe skew, confirming our cubic fit is well-behaved."
+  - "Our visualization suite directly reflects the linear algebra results: Plot 1 and Plot 2 show how our least squares cubic model smoothly captures the historical trajectory and projects warming forward to 2050, while Plot 3 illustrates the dominant principal direction of variance."
   - "To conclude, our least squares cubic model captures 88.6% of historical temperature variance, and eigendecomposition confirms 98.1% of bivariate variance aligns with the warming trend."
   - "However, our model has clear limitations:
     1. Cubic polynomial extrapolation diverges to infinity long-term.
@@ -117,7 +117,7 @@
 > - **Member 1:** "I handled the dataset preprocessing, formulated the Vandermonde matrix with normalized time, implemented Gaussian elimination with partial pivoting for RREF, verified matrix rank and system inconsistency, and evaluated interpolation."
 > - **Member 2:** "I implemented Gram-Schmidt orthogonalization from scratch to factor $A = QR$, solved the normal equations via back-substitution to obtain the least squares coefficients, and evaluated model goodness-of-fit ($R^2$)."
 > - **Member 3:** "I analyzed the geometry of the column space and null space, derived the orthogonal projection matrix $P_{\text{proj}}$, demonstrated residual orthogonality, and computed the future extrapolations to 2050."
-> - **Member 4:** "I formulated the covariance matrix, computed its eigenvalues and eigenvectors, verified matrix diagonalization $C = P D P^T$, created the visualization suite (raw fit, extrapolation, residuals, PCA plots), and synthesized the scientific conclusion."
+> - **Member 4:** "I formulated the covariance matrix, computed its eigenvalues and eigenvectors, verified matrix diagonalization $C = P D P^T$, created the visualization suite (raw fit, extrapolation, PCA plots), and synthesized the scientific conclusion."
 
 ---
 

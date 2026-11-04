@@ -156,13 +156,12 @@ If someone's local Python environment is giving trouble, you can run the entire 
 
 ## ✅ Verifying Your Setup
 Once opened, click **Restart Kernel & Run All Cells**. Verify that:
-- [x] All 17 code cells execute without any error.
-- [x] The 5 plots render cleanly:
+- [x] All 16 code cells execute without any error.
+- [x] The 4 plots render cleanly:
   1. Raw data scatter plot
   2. Least squares cubic polynomial fit
   3. Interpolation & extrapolation trajectory extending to 2050
-  4. Residual stem plot
-  5. Centered data cloud with principal eigenvector arrows & variance bar chart
+  4. Centered data cloud with principal eigenvector arrows & variance bar chart
 - [x] Summary printouts display:
   - System consistency: $\text{rank}(A) = 4, \text{rank}([A \mid b]) = 5$ (Inconsistent)
   - Fit quality: $R^2 \approx 0.8857$ (88.57% variance explained)
