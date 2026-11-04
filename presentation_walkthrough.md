@@ -1,16 +1,16 @@
 # Team Presentation Walkthrough & Demo Notes
 ## MFAD Mini-Project: "Interpolation, Extrapolation & Climate Change"
 **Format:** Live Jupyter notebook demonstration  
-**Target Duration:** 5 to 7 minutes total (~1 minute per topic)  
+**Target Duration:** 5 to 6 minutes total (~1 minute per topic)  
 **Style:** Internal team prep notes — keep it conversational, direct, and focused on the linear algebra concepts.
 
 ---
 
 ### Team Roles & Topic Ownership
-- **Member 1:** Data loading, matrix representation, RREF algorithm, rank & consistency check, interpolation
+- **Member 1:** Data loading, matrix representation, RREF algorithm, rank & consistency check
 - **Member 2:** Gram-Schmidt orthogonalization ($QR$ factorization), least squares derivation & solution
-- **Member 3:** Column space & null space geometry, orthogonal projection matrix, extrapolation analysis
-- **Member 4:** Covariance eigendecomposition, matrix diagonalization, visualization suite, project conclusion
+- **Member 3:** Column space & null space geometry, orthogonal projection matrix, interpolation analysis
+- **Member 4:** Future extrapolation trajectory to 2050, visualization suite, model limitations & project conclusion
 
 ---
 
@@ -22,7 +22,7 @@
 - **Talking points:**
   - "Hello Professor, our mini-project applies fundamental linear algebra to model historical climate change using NASA GISS global surface temperature anomalies from 1980 through 2023."
   - "We have 44 discrete annual observations showing a visible upward trajectory of around +0.9°C over four decades."
-  - "Instead of treating curve fitting as an arbitrary optimization or using high-level libraries, our goal is to derive polynomial fitting from first principles using vector spaces, projection, and eigendecomposition."
+  - "Instead of treating curve fitting as an arbitrary optimization or using high-level libraries, our goal is to derive polynomial fitting from first principles using vector spaces, projection, and linear systems."
 - **Handoff:** Move directly into the matrix setup.
 
 ---
@@ -56,7 +56,7 @@
 
 #### Minute 4: Projection & Least Squares Fit (Presenters: Member 3 + Member 2)
 - **What to show on screen:**
-  - Section 8 projection vector $\hat{p}$, residual orthogonality check $A^T (b - \hat{p}) \approx 0$, and least squares coefficients with $R^2$.
+  - Section 8 projection vector $\hat{p}$, residual orthogonality check $A^T (b - \hat{p}) \approx 0$, and Section 9 least squares coefficients with $R^2$.
 - **Talking points (Member 3):**
   - "To find the closest approximation to $b$ inside $\text{Col}(A)$, we compute the orthogonal projection $\hat{p} = P_{\text{proj}} b = A(A^T A)^{-1}A^T b$."
   - "The residual vector $e = b - \hat{p}$ represents the geometric error perpendicular to $\text{Col}(A)$."
@@ -65,59 +65,45 @@
   - "The projection $\hat{p}$ exactly equals $A\hat{x}$, where $\hat{x} = [a_0, a_1, a_2, a_3]^T$ are our least squares coefficients."
   - "We get $a_0 \approx 0.5103$, $a_1 \approx 0.4325$, $a_2 \approx 0.1151$, and $a_3 \approx -0.0203$."
   - "Our model achieves an $R^2 \approx 0.8857$, meaning over 88.5% of total temperature variance is captured by our cubic polynomial."
-- **Handoff:** "Now Member 1 and Member 3 will walk through our model evaluation: interpolation versus extrapolation."
+- **Handoff:** "Now Member 3 and Member 4 will walk through our model evaluation: interpolation versus extrapolation."
 
 ---
 
-#### Minute 5: Interpolation & Extrapolation Analysis (Presenters: Member 1 + Member 3)
+#### Minute 5: Model Evaluation — Interpolation & Extrapolation (Presenters: Member 3 + Member 4)
 - **What to show on screen:**
-  - Section 9 interpolation table, Section 10 extrapolation table, and Section 12 Plot 2 (combined curve with green diamonds and red stars).
-- **Talking points (Member 1):**
-  - "For interpolation, we evaluated 8 unobserved mid-years inside the historical window $[1980, 2023]$ (shown as green diamonds)."
-  - "Because these points are flanked on both sides by real data, the polynomial is tightly constrained. For example, in 2000.5 we predict $+0.51^\circ\text{C}$, which matches the historical decadal trend."
+  - Section 10 interpolation table, Section 11 extrapolation table, and Section 12 Plot 2 (combined curve with green diamonds and red stars).
 - **Talking points (Member 3):**
-  - "For extrapolation, we projected the model forward to 2050 at 5-year intervals (shown as red stars in the light red shaded region)."
+  - "In Section 10, for interpolation, we evaluated 8 unobserved mid-years inside the historical window $[1980, 2023]$ (shown as green diamonds in Plot 2)."
+  - "Because these points are flanked on both sides by real data, the polynomial is tightly constrained. For example, in 2000.5 we predict $+0.51^\circ\text{C}$, which matches the historical decadal trend with high reliability."
+- **Talking points (Member 4):**
+  - "In Section 11, for extrapolation, we projected the model forward to 2050 at 5-year intervals (shown as red stars in the light red shaded region of Plot 2)."
   - "The model predicts anomalies of $+1.24^\circ\text{C}$ by 2030, $+1.54^\circ\text{C}$ by 2040, and $+1.84^\circ\text{C}$ by 2050."
   - "Crucially, our polynomial crosses the Paris Agreement target of +1.5°C around year 2038–2040."
-  - "However, as linear algebra students, we know polynomials are unstable outside their domain. As $t > 1$, the $t^3$ term dominates and small coefficient errors blow up. Predictions past 2035 have high mathematical uncertainty."
-- **Handoff:** "Now Member 4 will present the eigendecomposition of the covariance matrix, our visualizations, and the conclusion."
+- **Handoff:** "Now Member 4 will discuss our visualizations, model limitations, and conclusions."
 
 ---
 
-#### Minute 6: Eigenvalue Analysis & Diagonalization (Presenter: Member 4)
+#### Minute 6: Visualizations, Limitations & Conclusion (Presenter: Member 4)
 - **What to show on screen:**
-  - Section 11 covariance matrix $C$, eigenvalues, diagonalization check `np.allclose(C, P @ D @ P.T)`, and Section 12 Plot 4 (1×2 subplot).
+  - Section 12 Plot 1 (fitted curve), Plot 2 (extrapolation to 2050), and the Conclusion markdown cell.
 - **Talking points (Member 4):**
-  - "To understand the bivariate structure between normalized time and temperature, we constructed the $2 \times 2$ covariance matrix $C = \frac{1}{N-1}X_c^T X_c$ and computed its eigendecomposition."
-  - "Because $C$ is symmetric, its eigenvectors are orthogonal. We diagonalize it as $C = P D P^T$ and verify it numerically on screen with `np.allclose` returning `True`."
-  - "Look at the eigenvalues: $\lambda_1 = 0.4213$ and $\lambda_2 = 0.0081$."
-  - "In the bar chart on the right, $\lambda_1$ accounts for **98.10%** of total variance! Its eigenvector $v_1$ points diagonally upwards in our scatter plot on the left, capturing the dominant long-term warming trend."
-  - "The second eigenvalue $\lambda_2$ accounts for only **1.90%** of variance. Its eigenvector $v_2$ points perpendicular to the trend, representing short-term climate noise like annual weather variations."
-  - "Diagonalization shows that global warming is almost entirely a 1-dimensional principal component signal."
-
----
-
-#### Minute 7: Visualizations, Limitations & Conclusion (Presenter: Member 4)
-- **What to show on screen:**
-  - Section 12 Plot 1 (fitted curve), Plot 2 (extrapolation to 2050), Plot 3 (eigenvalue & PCA subplot), and the Conclusion markdown cell.
-- **Talking points (Member 4):**
-  - "Our visualization suite directly reflects the linear algebra results: Plot 1 and Plot 2 show how our least squares cubic model smoothly captures the historical trajectory and projects warming forward to 2050, while Plot 3 illustrates the dominant principal direction of variance."
-  - "To conclude, our least squares cubic model captures 88.6% of historical temperature variance, and eigendecomposition confirms 98.1% of bivariate variance aligns with the warming trend."
+  - "Our visualization suite in Section 12 directly reflects the linear algebra results: Plot 1 demonstrates how the cubic polynomial captures the historical warming trend, while Plot 2 illustrates how it extrapolates into the future."
+  - "To conclude, our least squares cubic model captures 88.6% of historical temperature variance, confirming the steady upward warming trend over the past 44 years."
   - "However, our model has clear limitations:
-    1. Cubic polynomial extrapolation diverges to infinity long-term.
-    2. We only modeled time, omitting greenhouse gas emissions (CO₂), aerosols, and solar cycles.
+    1. Cubic polynomial extrapolation diverges rapidly long-term because outside $[-1, 1]$, the $t^3$ term dominates and small coefficient errors blow up. Predictions past 2035 have high mathematical uncertainty.
+    2. We only modeled time, omitting physical drivers like greenhouse gas emissions (CO₂), aerosols, and solar cycles.
     3. We used empirical linear algebra rather than physics-based thermodynamic equations."
-  - "In real-world climate science, this exact linear algebra is scaled up to millions of dimensions. Climate scientists use covariance eigendecomposition—known as **Empirical Orthogonal Functions (EOFs)**—to discover modes like El Niño, and use least squares data assimilation to calibrate climate models."
+  - "In real-world climate science, linear algebra is the core engine: scientists use large-scale least squares estimation and Kalman filtering to assimilate satellite data into global circulation models."
   - "Thank you Professor! We are ready for your questions."
 
 ---
 
 ### End Note: Viva Coordination & Handoffs
 > **If asked who did what, each member explains their specific sections:**
-> - **Member 1:** "I handled the dataset preprocessing, formulated the Vandermonde matrix with normalized time, implemented Gaussian elimination with partial pivoting for RREF, verified matrix rank and system inconsistency, and evaluated interpolation."
+> - **Member 1:** "I handled the dataset preprocessing, formulated the Vandermonde matrix with normalized time, implemented Gaussian elimination with partial pivoting for RREF, and verified matrix rank and system inconsistency."
 > - **Member 2:** "I implemented Gram-Schmidt orthogonalization from scratch to factor $A = QR$, solved the normal equations via back-substitution to obtain the least squares coefficients, and evaluated model goodness-of-fit ($R^2$)."
-> - **Member 3:** "I analyzed the geometry of the column space and null space, derived the orthogonal projection matrix $P_{\text{proj}}$, demonstrated residual orthogonality, and computed the future extrapolations to 2050."
-> - **Member 4:** "I formulated the covariance matrix, computed its eigenvalues and eigenvectors, verified matrix diagonalization $C = P D P^T$, created the visualization suite (raw fit, extrapolation, PCA plots), and synthesized the scientific conclusion."
+> - **Member 3:** "I analyzed the geometry of the column space and null space, derived the orthogonal projection matrix $P_{\text{proj}}$, demonstrated residual orthogonality, and evaluated intermediate interpolation."
+> - **Member 4:** "I evaluated future extrapolation to 2050, analyzed the Paris Agreement threshold crossing, created the visualization suite (raw fit and extrapolation plots), and synthesized the scientific conclusions and model limitations."
 
 ---
 
