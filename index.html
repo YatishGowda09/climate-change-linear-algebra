@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Climate Change Polynomial Predictor • MFAD Mini-Project</title>
+  <style>
+    :root {
+      --bg-color: #0b1120;
+      --card-bg: #131e36;
+      --card-border: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-cyan: #06b6d4;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-green: #10b981;
+      --card-hover: #1a2744;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1050px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    header {
+      text-align: center;
+      padding-bottom: 8px;
+    }
+
+    header h1 {
+      font-size: 1.85rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #38bdf8, #818cf8, #f43f5e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .badge {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: var(--accent-blue);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge.green {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: var(--accent-green);
+    }
+
+    .badge.amber {
+      background: rgba(245, 158, 11, 0.1);
+      border-color: rgba(245, 158, 11, 0.3);
+      color: var(--accent-amber);
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+    }
+
+    .card h2 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-main);
+    }
+
+    /* Input Grid */
+    .input-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .input-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    input[type="date"], input[type="number"] {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: var(--text-main);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    input[type="date"]:focus, input[type="number"]:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+
+    /* Slider Container */
+    .slider-container {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #1e293b;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--accent-blue);
+      transition: transform 0.1s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    /* Presets */
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .preset-btn {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .preset-btn:hover {
+      color: var(--text-main);
+      border-color: var(--accent-blue);
+      background: rgba(56, 189, 248, 0.08);
+    }
+
+    /* Dashboard Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+    }
+
+    .stat-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card.main {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(56, 189, 248, 0.08));
+    }
+
+    .stat-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-value {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .stat-value.highlight {
+      color: var(--accent-blue);
+    }
+
+    .stat-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Mode Banner */
+    .mode-banner {
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .mode-banner.interp {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+
+    .mode-banner.extrap {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+    }
+
+    /* Chart Canvas */
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 320px;
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Math Breakdown */
+    .math-box {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 14px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+      overflow-x: auto;
+    }
+
+    .math-step {
+      margin-bottom: 8px;
+    }
+
+    .math-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .math-label {
+      color: var(--accent-blue);
+      font-weight: 600;
+    }
+
+    .copy-btn {
+      align-self: flex-start;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent-blue);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: rgba(56, 189, 248, 0.22);
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      margin-top: 10px;
+      padding-bottom: 16px;
+    }
+
+    footer a {
+      color: var(--accent-blue);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Climate Change Polynomial Predictor</h1>
+      <p>MFAD Mini-Project (UE25MA242A) • Linear Algebra Least Squares Estimator</p>
+      <div class="badges">
+        <span class="badge">NASA GISS Data (1980–2023)</span>
+        <span class="badge green">R² = 0.8857 (88.6% Explained)</span>
+        <span class="badge amber">Full Column Rank = 4</span>
+      </div>
+    </header>
+
+    <!-- Input Card -->
+    <div class="card">
+      <h2>Input Date or Decimal Year</h2>
+      
+      <div class="input-grid">
+        <div class="input-group">
+          <label for="date-picker">Calendar Date Input</label>
+          <input type="date" id="date-picker" value="2026-11-04" min="1980-01-01" max="2050-12-31">
+        </div>
+
+        <div class="input-group">
+          <label for="year-input">Decimal Year Input</label>
+          <input type="number" id="year-input" value="2026.85" min="1980" max="2050" step="0.01">
+        </div>
+      </div>
+
+      <div class="slider-container">
+        <div class="slider-labels">
+          <span>1980 (Start)</span>
+          <span>2000 (Mid)</span>
+          <span>2023 (Latest Data)</span>
+          <span>2035 (IPCC)</span>
+          <span>2050 (Horizon)</span>
+        </div>
+        <input type="range" id="year-slider" min="1980" max="2050" step="0.05" value="2026.85">
+      </div>
+
+      <div class="presets">
+        <button class="preset-btn" onclick="setYear(1980.0)">1980.0 (Base Start)</button>
+        <button class="preset-btn" onclick="setYear(1998.5)">1998.5 (El Niño Peak)</button>
+        <button class="preset-btn" onclick="setYear(2000.5)">2000.5 (Interp Test)</button>
+        <button class="preset-btn" onclick="setYear(2023.0)">2023.0 (Latest Obs)</button>
+        <button class="preset-btn" onclick="setToToday()">Today (2026)</button>
+        <button class="preset-btn" onclick="setYear(2030.0)">2030.0 (Near-term)</button>
+        <button class="preset-btn" onclick="setYear(2040.0)">2040.0 (Paris +1.5°C)</button>
+        <button class="preset-btn" onclick="setYear(2050.0)">2050.0 (Forecast)</button>
+      </div>
+    </div>
+
+    <!-- Results Dashboard -->
+    <div class="card">
+      <h2>Model Evaluation & Prediction</h2>
+      
+      <div class="stats-grid">
+        <div class="stat-card main">
+          <div class="stat-title">NASA Anomaly (1951–80 Base)</div>
+          <div class="stat-value highlight" id="val-anomaly">+1.15 °C</div>
+          <div class="stat-sub" id="val-t-norm">Normalized t: +1.1802</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-title">Pre-Industrial Anomaly</div>
+          <div class="stat-value" id="val-preindustrial">+1.43 °C</div>
+          <div class="stat-sub">1850–1900 baseline (+0.28°C offset)</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-title">Fahrenheit Equivalent</div>
+          <div class="stat-value" id="val-fahrenheit">+2.06 °F</div>
+          <div class="stat-sub">Relative to 1951–1980 baseline</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-title">Paris +1.5°C Threshold</div>
+          <div class="stat-value" id="val-paris">95.1%</div>
+          <div class="stat-sub" id="val-paris-sub">Crosses threshold ~2038–2040</div>
+        </div>
+      </div>
+
+      <div id="mode-banner" class="mode-banner extrap">
+        <div id="mode-text">
+          <strong>Extrapolation Domain:</strong> Evaluating beyond year 2023. Unanchored polynomial projection.
+        </div>
+        <div id="mode-badge" class="badge amber">Extrapolation (t &gt; 1)</div>
+      </div>
+    </div>
+
+    <!-- Chart Card -->
+    <div class="card">
+      <h2>Polynomial Trajectory & Historical Data</h2>
+      <div class="chart-container">
+        <canvas id="trajectory-canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Math Derivation Box -->
+    <div class="card">
+      <h2>Mathematical Transparency (Step-by-Step)</h2>
+      <div class="math-box" id="math-derivation">
+        <!-- Rendered by JS -->
+      </div>
+      <div style="margin-top: 12px; display: flex; gap: 10px;">
+        <button class="copy-btn" onclick="copySummary()">
+          <span>📋 Copy Result Summary</span>
+        </button>
+      </div>
+    </div>
+
+    <footer>
+      MFAD Mini-Project (UE25MA242A) • Model: y(t) = 0.5103 + 0.4325·t + 0.1151·t² - 0.0203·t³ • <a href="Climate_Change_Project.ipynb">Open Jupyter Notebook</a>
+    </footer>
+  </div>
+
+  <script>
+    // Exact polynomial coefficients from Least Squares normal equations in notebook
+    const A0 = 0.5103077357425184;
+    const A1 = 0.4325175373463431;
+    const A2 = 0.1150875211744777;
+    const A3 = -0.0202871390058615;
+
+    const YEAR_MIN = 1980.0;
+    const YEAR_MAX = 2023.0;
+    const PRE_INDUSTRIAL_OFFSET = 0.28; // NASA GISS to pre-industrial offset
+
+    // Historical NASA GISS dataset (1980-2023) from climate_data.csv
+    const HISTORICAL_DATA = [
+      { year: 1980, temp: 0.26 }, { year: 1981, temp: 0.32 }, { year: 1982, temp: 0.14 },
+      { year: 1983, temp: 0.31 }, { year: 1984, temp: 0.15 }, { year: 1985, temp: 0.12 },
+      { year: 1986, temp: 0.18 }, { year: 1987, temp: 0.33 }, { year: 1988, temp: 0.39 },
+      { year: 1989, temp: 0.27 }, { year: 1990, temp: 0.45 }, { year: 1991, temp: 0.41 },
+      { year: 1992, temp: 0.22 }, { year: 1993, temp: 0.24 }, { year: 1994, temp: 0.31 },
+      { year: 1995, temp: 0.45 }, { year: 1996, temp: 0.33 }, { year: 1997, temp: 0.46 },
+      { year: 1998, temp: 0.61 }, { year: 1999, temp: 0.40 }, { year: 2000, temp: 0.39 },
+      { year: 2001, temp: 0.54 }, { year: 2002, temp: 0.63 }, { year: 2003, temp: 0.62 },
+      { year: 2004, temp: 0.54 }, { year: 2005, temp: 0.68 }, { year: 2006, temp: 0.64 },
+      { year: 2007, temp: 0.66 }, { year: 2008, temp: 0.54 }, { year: 2009, temp: 0.64 },
+      { year: 2010, temp: 0.72 }, { year: 2011, temp: 0.61 }, { year: 2012, temp: 0.64 },
+      { year: 2013, temp: 0.68 }, { year: 2014, temp: 0.75 }, { year: 2015, temp: 0.90 },
+      { year: 2016, temp: 1.01 }, { year: 2017, temp: 0.92 }, { year: 2018, temp: 0.85 },
+      { year: 2019, temp: 0.98 }, { year: 2020, temp: 1.02 }, { year: 2021, temp: 0.85 },
+      { year: 2022, temp: 0.89 }, { year: 2023, temp: 1.17 }
+    ];
+
+    // DOM Elements
+    const datePicker = document.getElementById("date-picker");
+    const yearInput = document.getElementById("year-input");
+    const yearSlider = document.getElementById("year-slider");
+    const valAnomaly = document.getElementById("val-anomaly");
+    const valTNorm = document.getElementById("val-t-norm");
+    const valPreindustrial = document.getElementById("val-preindustrial");
+    const valFahrenheit = document.getElementById("val-fahrenheit");
+    const valParis = document.getElementById("val-paris");
+    const valParisSub = document.getElementById("val-paris-sub");
+    const modeBanner = document.getElementById("mode-banner");
+    const modeText = document.getElementById("mode-text");
+    const modeBadge = document.getElementById("mode-badge");
+    const mathDerivation = document.getElementById("math-derivation");
+    const canvas = document.getElementById("trajectory-canvas");
+    const ctx = canvas.getContext("2d");
+
+    let currentYear = 2026.845;
+
+    // Helpers
+    function dateToDecimalYear(dateStr) {
+      if (!dateStr) return 2026.85;
+      const parts = dateStr.split("-");
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10) - 1;
+      const d = parseInt(parts[2], 10);
+      const dateObj = new Date(Date.UTC(y, m, d));
+      const startOfYear = new Date(Date.UTC(y, 0, 1));
+      const startOfNextYear = new Date(Date.UTC(y + 1, 0, 1));
+      const fraction = (dateObj - startOfYear) / (startOfNextYear - startOfYear);
+      return y + fraction;
+    }
+
+    function decimalYearToDate(decimalYear) {
+      const y = Math.floor(decimalYear);
+      const frac = decimalYear - y;
+      const isLeap = (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+      const totalDays = isLeap ? 366 : 365;
+      const dayOfYear = Math.min(totalDays, Math.max(1, Math.round(frac * totalDays) + 1));
+      
+      const dateObj = new Date(Date.UTC(y, 0, dayOfYear));
+      const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
+      const day = String(dateObj.getUTCDate()).padStart(2, "0");
+      return `${y}-${month}-${day}`;
+    }
+
+    function evaluateModel(year) {
+      const t = 2.0 * (year - YEAR_MIN) / (YEAR_MAX - YEAR_MIN) - 1.0;
+      const t2 = t * t;
+      const t3 = t2 * t;
+      const temp = A0 + A1 * t + A2 * t2 + A3 * t3;
+      return { t, t2, t3, temp };
+    }
+
+    function updateAll(year, origin = "other") {
+      currentYear = Math.max(1980, Math.min(2050, year));
+
+      // Synchronize inputs
+      if (origin !== "slider") yearSlider.value = currentYear.toFixed(2);
+      if (origin !== "number") yearInput.value = currentYear.toFixed(2);
+      if (origin !== "date") {
+        const dStr = decimalYearToDate(currentYear);
+        datePicker.value = dStr;
+      }
+
+      // Compute Model Values
+      const { t, t2, t3, temp } = evaluateModel(currentYear);
+      const preindustrial = temp + PRE_INDUSTRIAL_OFFSET;
+      const fahrenheit = temp * 1.8;
+
+      // Update KPIs
+      valAnomaly.textContent = (temp >= 0 ? "+" : "") + temp.toFixed(4) + " °C";
+      valTNorm.textContent = `Normalized coordinate t: ${(t >= 0 ? "+" : "")}${t.toFixed(4)}`;
+      valPreindustrial.textContent = (preindustrial >= 0 ? "+" : "") + preindustrial.toFixed(4) + " °C";
+      valFahrenheit.textContent = (fahrenheit >= 0 ? "+" : "") + fahrenheit.toFixed(4) + " °F";
+
+      // Paris agreement comparison (threshold is 1.5°C pre-industrial)
+      const parisPct = (preindustrial / 1.5) * 100;
+      valParis.textContent = `${Math.min(200, Math.max(0, parisPct)).toFixed(1)}%`;
+      if (preindustrial >= 1.5) {
+        valParisSub.textContent = `Exceeds +1.5°C threshold by +${(preindustrial - 1.5).toFixed(2)}°C`;
+        valParis.style.color = "var(--accent-red)";
+      } else {
+        valParisSub.textContent = `${(1.5 - preindustrial).toFixed(2)}°C below +1.5°C Paris limit`;
+        valParis.style.color = "var(--accent-amber)";
+      }
+
+      // Update Domain Mode (Interpolation vs Extrapolation)
+      const isInterp = currentYear <= YEAR_MAX;
+      if (isInterp) {
+        modeBanner.className = "mode-banner interp";
+        modeText.innerHTML = `<strong>Interpolation Domain (1980–2023):</strong> Evaluating inside empirical observation window. The polynomial is mathematically anchored on both sides by NASA observations.`;
+        modeBadge.className = "badge green";
+        modeBadge.textContent = "Interpolation (t ≤ 1)";
+      } else {
+        modeBanner.className = "mode-banner extrap";
+        modeText.innerHTML = `<strong>Extrapolation Domain (2024–2050):</strong> Evaluating beyond observed data. Unanchored polynomial projection. Higher-order powers dominate as |t| &gt; 1.`;
+        modeBadge.className = "badge amber";
+        modeBadge.textContent = "Extrapolation (t > 1)";
+      }
+
+      // Update Math Breakdown
+      mathDerivation.innerHTML = `
+<div class="math-step"><span class="math-label">[Step 1: Input]</span> Selected Year Y = ${currentYear.toFixed(4)}</div>
+<div class="math-step"><span class="math-label">[Step 2: Normalization]</span> t = 2·(Y - 1980)/43 - 1 = 2·(${currentYear.toFixed(4)} - 1980)/43 - 1 = <strong>${(t >= 0 ? "+" : "")}${t.toFixed(6)}</strong></div>
+<div class="math-step"><span class="math-label">[Step 3: Monomials]</span> t¹ = ${(t).toFixed(6)}, t² = ${(t2).toFixed(6)}, t³ = ${(t3).toFixed(6)}</div>
+<div class="math-step"><span class="math-label">[Step 4: Polynomial Evaluation]</span></div>
+  T(t) = a₀ + a₁·t + a₂·t² + a₃·t³
+       = (${A0.toFixed(4)}) + (${A1.toFixed(4)})·(${(t).toFixed(4)}) + (${A2.toFixed(4)})·(${(t2).toFixed(4)}) + (${A3.toFixed(4)})·(${(t3).toFixed(4)})
+       = ${(A0).toFixed(4)} + ${(A1 * t).toFixed(4)} + ${(A2 * t2).toFixed(4)} + ${(A3 * t3).toFixed(4)}
+       = <strong style="color:var(--accent-blue);font-size:0.95rem;">${(temp >= 0 ? "+" : "")}${temp.toFixed(6)} °C</strong>
+      `;
+
+      // Redraw Canvas
+      drawChart(currentYear, temp);
+    }
+
+    // Interactive Chart Canvas
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      drawChart(currentYear, evaluateModel(currentYear).temp);
+    }
+
+    function drawChart(selectedYear, selectedTemp) {
+      if (!canvas.width || !canvas.height) return;
+      const dpr = window.devicePixelRatio || 1;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const width = canvas.width / dpr;
+      const height = canvas.height / dpr;
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+
+      const padLeft = 55;
+      const padRight = 35;
+      const padTop = 30;
+      const padBottom = 40;
+      const plotWidth = width - padLeft - padRight;
+      const plotHeight = height - padTop - padBottom;
+
+      const minX = 1978;
+      const maxX = 2052;
+      const minY = 0.0;
+      const maxY = 2.0;
+
+      function toX(y) {
+        return padLeft + ((y - minX) / (maxX - minX)) * plotWidth;
+      }
+      function toY(t) {
+        return padTop + plotHeight - ((t - minY) / (maxY - minY)) * plotHeight;
+      }
+
+      // Shaded domain background
+      const splitX = toX(2023);
+      // Historical domain
+      ctx.fillStyle = "rgba(16, 185, 129, 0.05)";
+      ctx.fillRect(toX(1980), padTop, splitX - toX(1980), plotHeight);
+      // Extrapolation domain
+      ctx.fillStyle = "rgba(245, 158, 11, 0.05)";
+      ctx.fillRect(splitX, padTop, toX(2050) - splitX, plotHeight);
+
+      // Domain border line at 2023
+      ctx.strokeStyle = "rgba(148, 163, 184, 0.35)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(splitX, padTop);
+      ctx.lineTo(splitX, padTop + plotHeight);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Domain labels
+      ctx.font = "10px sans-serif";
+      ctx.fillStyle = "rgba(16, 185, 129, 0.7)";
+      ctx.fillText("HISTORICAL DOMAIN [1980-2023]", toX(1982), padTop + 14);
+      ctx.fillStyle = "rgba(245, 158, 11, 0.7)";
+      ctx.fillText("EXTRAPOLATION [2024-2050]", splitX + 8, padTop + 14);
+
+      // Grid lines & Y labels
+      ctx.font = "11px sans-serif";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      for (let tempVal = 0.0; tempVal <= 2.0; tempVal += 0.5) {
+        const yPx = toY(tempVal);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+        ctx.beginPath();
+        ctx.moveTo(padLeft, yPx);
+        ctx.lineTo(width - padRight, yPx);
+        ctx.stroke();
+
+        ctx.fillStyle = "#64748b";
+        ctx.fillText(`+${tempVal.toFixed(1)}°C`, padLeft - 8, yPx);
+      }
+
+      // X Grid & labels
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      for (let yr = 1980; yr <= 2050; yr += 10) {
+        const xPx = toX(yr);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+        ctx.beginPath();
+        ctx.moveTo(xPx, padTop);
+        ctx.lineTo(xPx, padTop + plotHeight);
+        ctx.stroke();
+
+        ctx.fillStyle = "#64748b";
+        ctx.fillText(yr.toString(), xPx, padTop + plotHeight + 8);
+      }
+
+      // Paris +1.5°C threshold line
+      const parisY = toY(1.5 - PRE_INDUSTRIAL_OFFSET); // roughly 1.22°C on NASA scale
+      ctx.strokeStyle = "rgba(239, 68, 68, 0.6)";
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(padLeft, parisY);
+      ctx.lineTo(width - padRight, parisY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "rgba(239, 68, 68, 0.85)";
+      ctx.textAlign = "right";
+      ctx.fillText("Paris +1.5°C (~1.22°C NASA)", width - padRight - 6, parisY - 10);
+
+      // Fitted Polynomial Curve
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      let first = true;
+      for (let yr = 1980; yr <= 2050; yr += 0.25) {
+        const { temp } = evaluateModel(yr);
+        const x = toX(yr);
+        const y = toY(temp);
+        if (first) {
+          ctx.moveTo(x, y);
+          first = false;
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.stroke();
+
+      // Plot historical data points
+      for (let obs of HISTORICAL_DATA) {
+        const x = toX(obs.year);
+        const y = toY(obs.temp);
+        ctx.fillStyle = "#38bdf8";
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#0f172a";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Plot Selected Point Marker (Crosshair + Pulsing Dot)
+      const selX = toX(selectedYear);
+      const selY = toY(selectedTemp);
+
+      // Vertical guide line
+      ctx.strokeStyle = "rgba(244, 63, 94, 0.6)";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(selX, padTop);
+      ctx.lineTo(selX, padTop + plotHeight);
+      ctx.stroke();
+
+      // Horizontal guide line
+      ctx.beginPath();
+      ctx.moveTo(padLeft, selY);
+      ctx.lineTo(selX, selY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Glow circle
+      ctx.fillStyle = "rgba(244, 63, 94, 0.25)";
+      ctx.beginPath();
+      ctx.arc(selX, selY, 11, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Inner dot
+      ctx.fillStyle = "#f43f5e";
+      ctx.beginPath();
+      ctx.arc(selX, selY, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Dynamic Marker Tooltip
+      ctx.fillStyle = "#0f172a";
+      ctx.strokeStyle = "#f43f5e";
+      ctx.lineWidth = 1;
+      const tipText = `${selectedYear.toFixed(2)} : ${(selectedTemp >= 0 ? "+" : "")}${selectedTemp.toFixed(2)}°C`;
+      ctx.font = "bold 11px sans-serif";
+      const tipWidth = ctx.measureText(tipText).width + 16;
+      const tipHeight = 22;
+      let tipX = selX - tipWidth / 2;
+      if (tipX < padLeft) tipX = padLeft;
+      if (tipX + tipWidth > width - padRight) tipX = width - padRight - tipWidth;
+      const tipY = selY - 28;
+
+      ctx.beginPath();
+      ctx.roundRect(tipX, tipY, tipWidth, tipHeight, 4);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(tipText, tipX + tipWidth / 2, tipY + tipHeight / 2);
+
+      ctx.restore();
+    }
+
+    // Event Listeners
+    datePicker.addEventListener("input", (e) => {
+      const year = dateToDecimalYear(e.target.value);
+      updateAll(year, "date");
+    });
+
+    yearInput.addEventListener("input", (e) => {
+      const year = parseFloat(e.target.value);
+      if (!isNaN(year)) updateAll(year, "number");
+    });
+
+    yearSlider.addEventListener("input", (e) => {
+      const year = parseFloat(e.target.value);
+      if (!isNaN(year)) updateAll(year, "slider");
+    });
+
+    window.setYear = function(year) {
+      updateAll(year);
+    };
+
+    window.setToToday = function() {
+      const now = new Date();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const dateStr = `${now.getFullYear()}-${month}-${day}`;
+      datePicker.value = dateStr;
+      updateAll(dateToDecimalYear(dateStr), "date");
+    };
+
+    window.copySummary = function() {
+      const { temp, t } = evaluateModel(currentYear);
+      const preindustrial = temp + PRE_INDUSTRIAL_OFFSET;
+      const text = `MFAD Linear Algebra Climate Predictor:
+• Target Date: ${datePicker.value} (Year ${currentYear.toFixed(4)})
+• Normalized Coordinate t: ${(t >= 0 ? "+" : "")}${t.toFixed(4)}
+• Predicted NASA Anomaly: ${(temp >= 0 ? "+" : "")}${temp.toFixed(4)} °C
+• Pre-Industrial Anomaly: ${(preindustrial >= 0 ? "+" : "")}${preindustrial.toFixed(4)} °C
+• Model: y(t) = 0.5103 + 0.4325·t + 0.1151·t² - 0.0203·t³ (R² = 0.8857)`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Summary copied to clipboard!");
+      }).catch(() => {
+        prompt("Copy this summary:", text);
+      });
+    };
+
+    window.addEventListener("resize", resizeCanvas);
+
+    // Initial run
+    window.addEventListener("DOMContentLoaded", () => {
+      resizeCanvas();
+      updateAll(2026.845);
+    });
+  </script>
+</body>
+</html>

@@ -55,6 +55,7 @@ This project applies linear algebra from first principles to model global climat
 
 ```
 climate-change-linear-algebra/
+├── index.html                       # Interactive Web MVP to predict temperature anomalies for any date or year
 ├── climate_data.csv                 # Cleaned NASA GISS annual global temperature anomalies (1980–2023)
 ├── Climate_Change_Project.ipynb     # Complete, single, pre-rendered Jupyter notebook with all math, code & plots
 ├── presentation_walkthrough.md      # Minute-by-minute speaking guide for the 5-6 minute team demo
@@ -64,6 +65,17 @@ climate-change-linear-algebra/
 ├── .gitignore                       # Clean Git configuration (ignores .venv, caches, etc.)
 └── README.md                        # Project documentation and summary
 ```
+
+---
+
+## 🌐 Interactive Web MVP (`index.html`)
+
+An interactive, zero-dependency web application to estimate global temperature anomalies for any custom calendar date or decimal year:
+- **Date Picker & Year Slider:** Select any calendar date from 1980 to 2050 (or type fractional years like `2024.5`).
+- **Real-Time Evaluation:** Implements the exact polynomial $T(t) = 0.5103 + 0.4325t + 0.1151t^2 - 0.0203t^3$ with normalized coordinate $t = \frac{2(\text{year} - 1980)}{43} - 1$.
+- **Interactive Trajectory Chart:** High-DPI canvas plot showing the 44 NASA GISS historical observations, the fitted cubic trajectory, domain shading, and live reticle tracking.
+- **Multi-Unit Anomaly Outputs:** Displays anomalies on the NASA 1951–1980 baseline, the Paris Agreement pre-industrial baseline (+0.28°C offset), and in Fahrenheit.
+- **To Launch:** Simply double-click [`index.html`](index.html) in any web browser!
 
 ---
 
